@@ -12,3 +12,26 @@ $font-size: 13px;
 	
 	transform: perspective(100px);
 }
+
+.raw-data {
+	font-family: Courier, 'Lucida Console';
+	font-size: 12px;
+	
+	border: 1px solid black;
+	padding: 10px;
+	margin-bottom: 10px;
+}
+
+.chart {
+	margin-bottom: 10px;
+}
+
+.bar {
+	height: 3px;
+	margin-bottom:1px;
+	background-color: blue;
+	
+	&.red {
+		background-color: red;
+	}
+}

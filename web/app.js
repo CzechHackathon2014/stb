@@ -1,33 +1,22 @@
-angular.module('SmartToothBrush', [ 'angularCharts' ]).controller("ToothBrushCtrl", function($scope, $http, $timeout) {
-	var reqHeaders = {
-		'X-Parse-Application-Id': 'LTxpj4PZ88hs9OwNLobWYwzI2Xr1nAAQpD555oPc',
-		'X-Parse-REST-API-Key': 'NOl6eSpzXjySARLWGrIHgLD4qohcTQ8zzq0clLQP'
-	};
-	
-	$scope.brushStyle = '';
-	
-	$scope.data = [];
-	$scope.lastCreatedAt = undefined;
-	$scope.lastBatchCount = 0;
-	$scope.lastSampleCount = 0;
-	
-	$scope.currentFrame = 0;
-	$scope.totalFrames = 0;
-	$scope.currentPoint = [];
-	
-	var setActive = function(record) {
-		$scope.currentPoint = record;
-		$scope.direction = getDirection(record.accel);
-		//$scope.brushStyle = sampleToStyle(record);
-	};
+angular.module('SmartToothBrush', []).controller("ToothBrushCtrl", function($scope, $http, $timeout) {
+	var initProgress = function() {
+		var dirs = ['up', 'down', 'left', 'right', 'up-inner', 'down-inner'],
+			prog = {},
+			i, len;
 		
-	var sampleToStyle = function(rec) {
-		if (rec) {
-			var p2s = function(aa) {
-				return (aa * 10) + 'px';
-			};
-			
-			return 'transform: perspective(100px) translateX(' + p2s(rec.accel[0]) + ') translateY(' + p2s(rec.accel[1]) + ') translateZ(' + p2s(rec.accel[2]) + ')';
+		for (i = 0, len = dirs.length; i < len; i++) {
+			prog[dirs[i]] = { count: 0, points: 0 };
+		}
+		
+		return prog;
+	};
+	
+	var updateProgress = function(activity) {
+		var dir = $scope.progress[activity.direction];
+		
+		if (dir) {
+			dir.count++;
+			dir.points += activity.intensity;
 		}
 	};
 	
@@ -47,12 +36,83 @@ angular.module('SmartToothBrush', [ 'angularCharts' ]).controller("ToothBrushCtr
 		
 		switch (axis) {
 			case 'x':
-				return Math.sign(ac[0]) > 0 ? 'nose' : 'wc';
+				return Math.sign(ac[0]) > 0 ? 'inner-up' : 'inner-down';
 			case 'y':
 				return Math.sign(ac[1]) > 0 ? 'right' : 'left';
 			case 'z':
 				return Math.sign(ac[2]) > 0 ? 'up' : 'down';
 		}
+	};
+	
+	var analyzeDirection = function(data, offset, count, result) {
+		var avg = [ 0, 0, 0 ], i, j;
+		
+		for (i = 0; i < count; i++) {
+			var a = data[offset + i].accel;
+			
+			for (j = 0; j < 3; j++) {
+				avg[j] += a[j];
+			}
+		}
+		
+		for (j = 0; j < 3; j++) {
+			avg[j] /= count;
+		}
+		
+		result.avgAccel = avg;
+		result.direction = getDirection(avg);
+	};
+	
+	var analyzeFFT = function(data, offset, count, result) {
+		var samples = new complex_array.ComplexArray(count),
+			norm = Math.sqrt(count),
+			fftResults = new Array(count),
+			fftSource;
+		
+		samples.map(function(value, i) {
+			var a = data[offset + i].accel;
+			value.real = Math.sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
+		});
+		
+		fftSource = samples.magnitude();		
+
+		samples.FFT();
+	
+		samples.magnitude().forEach(function(value, i) {
+			fftResults[i] = value / norm;
+		});
+		
+		
+		var max = 0, maxi = 1;
+		
+		for (var i = 1; i < count / 2; i++) {
+			if (fftResults[i] > max) {
+				max = fftResults[i];
+				maxi = i;
+			}
+		}
+
+		result.fftSource = fftSource;
+		result.fftResults = fftResults;
+		result.frequency = (maxi * 10.0) / count;
+		result.intensity = max;
+	};
+	
+	var analyze = function(data, current, fftSize) {
+		var result = {};
+		
+		analyzeDirection(data, current - fftSize, fftSize, result);
+		analyzeFFT(data, current - fftSize, fftSize, result);
+		
+		$scope.fftSource = result.fftSource;
+		$scope.fftResults = result.fftResults;
+		
+		$scope.activity.unshift(result);
+		if ($scope.activity.length > 10) {
+			$scope.activity.pop();
+		}
+		
+		updateProgress(result);
 	};
 	
 	var parseSample = function(s) {
@@ -72,17 +132,17 @@ angular.module('SmartToothBrush', [ 'angularCharts' ]).controller("ToothBrushCtr
 	};
 	
 	var animLoop = function() {
-		if ($scope.currentFrame < $scope.totalFrames) {
-			$timeout(function() {
-				setActive($scope.data[$scope.currentFrame++]);
-				animLoop();
-			}, 100);
+		while ($scope.currentFrame < $scope.totalFrames) {
+			$scope.currentPoint = $scope.data[$scope.currentFrame++];
+			
+			var fftSize = 20;
+			
+			if ($scope.currentFrame > fftSize && (($scope.currentFrame % fftSize) === 0)) {
+				analyze($scope.data, $scope.currentFrame, fftSize);
+			}
 		}
-		else {
-			$timeout(function() {
-				animLoop();
-			}, 1000);
-		}
+
+		$timeout(animLoop, 10);
 	};
 	
 	var requestLoop = function() {
@@ -118,8 +178,6 @@ angular.module('SmartToothBrush', [ 'angularCharts' ]).controller("ToothBrushCtr
 			
 			if (lastCreatedAt) {
 				$scope.lastCreatedAt = lastCreatedAt;
-				
-				$scope.currentFrame = prevCount;
 				$scope.totalFrames = newCount;
 			}
 			
@@ -128,13 +186,34 @@ angular.module('SmartToothBrush', [ 'angularCharts' ]).controller("ToothBrushCtr
 			
 			$scope.lastRequestResp = new Date();
 			
-			$timeout(requestLoop, 5000);
+			$timeout(requestLoop, 2000);
 		});
 		
 		request.error(function() {
 		    alert('Error fetching accel data');
 		});
 	};
+	var reqHeaders = {
+		'X-Parse-Application-Id': 'LTxpj4PZ88hs9OwNLobWYwzI2Xr1nAAQpD555oPc',
+		'X-Parse-REST-API-Key': 'NOl6eSpzXjySARLWGrIHgLD4qohcTQ8zzq0clLQP'
+	};
+	
+	$scope.floor = Math.floor;
+	
+	$scope.data = [];
+	$scope.activity = [];
+	$scope.progress = initProgress();
+	
+	$scope.lastCreatedAt = undefined;
+	$scope.lastBatchCount = 0;
+	$scope.lastSampleCount = 0;
+
+	$scope.fftSource = [];
+	$scope.fftResults = [];
+	
+	$scope.currentFrame = 0;
+	$scope.totalFrames = 0;
+	$scope.currentPoint = [];
 	
 	requestLoop();
 	animLoop();
