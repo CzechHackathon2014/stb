@@ -36,13 +36,14 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Random;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MyActivity extends Activity implements SensorEventListener {
 
-    final boolean btSource = false;
+    final boolean btSource = true;
     boolean running = false;
 
     private SensorManager mSensorManager;
@@ -54,9 +55,16 @@ public class MyActivity extends Activity implements SensorEventListener {
     private BluetoothSocket btSocket = null;
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     final int RECIEVE_MESSAGE = 1;
+    Random random = new Random();
+    int cleaningId;
 
     public void onClick(View v) {
         running = ! running;
+        Button button = (Button) findViewById(R.id.button);
+        button.setText(running ? "Stop" : "Start");
+        if (running) {
+            cleaningId = random.nextInt();
+        }
     }
 
     // Create a BroadcastReceiver for ACTION_FOUND
@@ -95,7 +103,7 @@ public class MyActivity extends Activity implements SensorEventListener {
                 switch (msg.what) {
                     case RECIEVE_MESSAGE:
                         //A: x:    -8 y:   -16 z: -1040 M: x:   122 y:  -307 z:   459
-                        Pattern dp = Pattern.compile("A: x: +(-?\\d+) y: +(-?\\d+) z: +(-?\\d+) M: x: +(-?\\d+) y: +(-?\\d+) z: +(-?\\d+)");
+                        Pattern dp = Pattern.compile("A: x: +(-?\\d+) y: +(-?\\d+) z: +(-?\\d+) M: x: +(-?\\d+) y: +(-?\\d+) z: +(-?\\d+)", Pattern.CASE_INSENSITIVE);
                         String line = (String)msg.obj;
 
                         Matcher m = dp.matcher(line);
@@ -152,7 +160,6 @@ public class MyActivity extends Activity implements SensorEventListener {
         view.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.test));
         view2.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.test2));
 
-        Button button = (Button) findViewById(R.id.button);
     }
 
     private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
@@ -213,7 +220,7 @@ public class MyActivity extends Activity implements SensorEventListener {
 
             ParseObject testObject = new ParseObject("SensorData");
             testObject.put("data", sdata);
-            testObject.put("cleaningId", 1);
+            testObject.put("cleaningId", cleaningId);
             testObject.saveInBackground(new SaveCallback() {
                 @Override
                 public void done(ParseException e) {
@@ -233,8 +240,6 @@ public class MyActivity extends Activity implements SensorEventListener {
             //Log.d("asd", String.format("%d, %d", view.getWidth(), view.getHeight()));
         }
     }
-
-    ;
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
