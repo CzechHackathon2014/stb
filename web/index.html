@@ -11,22 +11,27 @@
 
     <body ng-app="SmartToothBrush">
       <div ng-controller="ToothBrushCtrl">
-		<div class="page-box">
-			<div class="tooth-box up">up: {{ progress.up.count }}</div>
-			<div class="tooth-box left">left</div><div class="tooth-box right">right</div>
-			<div class="tooth-box down">down</div>
+		<div class="page-box teeth-box">
+			<div class="tooth-box up" style="{{ pointToColor(points.up) }}" title="{{points.up}}"></div>
+			<div class="tooth-box left" style="{{ pointToColor(points.left) }}" title="{{points.left}}"></div><!--
+			--><div class="tooth-box right" style="{{ pointToColor(points.right) }}" title="{{points.right}}"></div>
+			<div class="tooth-box down" style="{{ pointToColor(points.down)}}" title="{{points.down}}"></div>
+			<div class="progress" style="{{ pointsToWidth() }}" ng-show="!cleaningComplete"></div>
+			<div class="complete" ng-show="cleaningComplete"></div>
 		</div>
 		<div class="page-box raw-data">
-			<p>Number of records: {{ data.length }}</p>
-			<p>Last request: sent: {{ lastRequestSent }} resp: {{ lastRequestResp }} since: {{ lastCreatedAt }} objs: {{ lastBatchCount}} samples: {{ lastSampleCount }}</p>
-			<p>Action: {{ currentFrame }} of {{ totalFrames}} - {{ currentPoint }}</p>
+			<h3>Telemetry</h3>
+			<p>Cleaning ID: {{ cleaningId }}</p>
+			<p>Last request: sent: {{ lastRequestSent }} resp: {{ lastRequestResp }} since: {{ lastCreatedAt }}
+				objs: {{ lastBatchCount}}/{{ lastBatchServerCount}} samples: {{ lastSampleCount }}</p>
+			<p>Action: {{ currentFrame }} of {{ data.length }} - {{ currentPoint }}</p>
 			<div class="chart">
 				<div ng-repeat="number in fftResults track by $index" class="bar" style="width:{{floor(number * 50)}}px" title="{{number}}"></div>
 			</div>
 			<div class="chart">
 				<div ng-repeat="number in fftSource track by $index" class="bar red" style="width:{{floor(number * 50)}}px" title="{{number}}"></div>
 			</div>
-			<div ng-repeat="a in activity"><b>{{ a.direction }}</b> {{a.frequency}} Hz, {{ a.intensity}} intensity, avgAccel: {{ a.avgAccel }}</p>
+			<div ng-repeat="a in activity" ng-class="{qualifies: a.qualifies}"><b>{{ a.direction }}</b> {{a.frequency}} Hz, {{ a.intensity}} intensity, avgAccel: {{ a.avgAccel }}</p>
 </div>
 		</div>
       </div>

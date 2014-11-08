@@ -1,6 +1,7 @@
 body {
 	font-family: 'Helvetica Neue', 'Helvetica';
 	font-size: 12px;
+	background-color: #eee;
 }
 
 .page-box {	
@@ -13,23 +14,71 @@ body {
 	font-family: Courier, 'Lucida Console';	
 }
 
+.teeth-box {
+	background-color: white;
+	width: 666px;
+	border: 0 none;
+	position: relative;
+	margin-left: auto;
+	margin-right: auto;
+}
+
 .tooth-box {
-	height: 40px;
 	line-height: 40px;
-	border: 1px solid #888;
 	background-color: rgba(255, 204, 51, 1.0);
-	margin-right: 10px;
-	margin-bottom: 10px;
 	text-align: center;
 	
-	&.up, &.down {
-		width: 412px;
+	&.up {
+		background-image: url(img/zuby-horni.png);
+		-webkit-clip-path: polygon(639px 6px,625px 146px,594px 191px,480px 244px,357px 269px,288px 269px,126px 224px,20px 176px,18px 10px);
+		width: 656px;
+		height: 277px;
+		z-index: 1;
+		margin-bottom: -74px;
+	}
+
+	&.down {
+		background-image: url(img/zuby-spodni.png);
+		-webkit-clip-path: polygon(634px 272px,633px 150px,599px 86px,502px 44px,387px 7px,257px 9px,67px 83px,31px 143px,20px 271px);
+		width: 656px;
+		height: 277px;		
+		z-index: 1;
+		margin-top: -79px;
 	}
 	
-	&.left, &.right {
-		width: 200px;
+	&.left {
+		background-image: url(img/left.png);
+		width: 462px;
+		height: 219px;
+		margin-left: 8px;
 		display: inline-block;
 	}
+	
+	&.right {
+		background-image: url(img/right.png);
+		width: 194px;
+		height: 219px;
+		margin-left: -12px;
+		display: inline-block;		
+	}
+}
+
+.complete {
+	background-image: url(img/complete.jpg);
+	border: 6px solid white;
+	border-radius: 10px;
+	width: 256px;
+	height: 192px;
+	margin-left: -134px;
+	margin-top: -102px;
+	top: 50%;
+	left: 50%;
+	position: absolute;
+}
+
+.progress {
+	height: 3px;
+	background-color: turquoise;
 }
 
 .chart {
@@ -44,4 +93,8 @@ body {
 	&.red {
 		background-color: red;
 	}
+}
+
+.qualifies b {
+	color: red;
 }

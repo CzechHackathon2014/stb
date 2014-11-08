@@ -1,23 +1,52 @@
 angular.module('SmartToothBrush', []).controller("ToothBrushCtrl", function($scope, $http, $timeout) {
-	var initProgress = function() {
+	var initPoints = function() {
 		var dirs = ['up', 'down', 'left', 'right', 'up-inner', 'down-inner'],
-			prog = {},
+			points = {},
 			i, len;
 		
 		for (i = 0, len = dirs.length; i < len; i++) {
-			prog[dirs[i]] = { count: 0, points: 0 };
+			points[dirs[i]] = 0;
 		}
 		
-		return prog;
+		return points;
 	};
 	
-	var updateProgress = function(activity) {
-		var dir = $scope.progress[activity.direction];
+	var awardPoints = function(activity) {
+		if (qualifies(activity)) {
+			var dirPoints = $scope.points[activity.direction];
 		
-		if (dir) {
-			dir.count++;
-			dir.points += activity.intensity;
+			if (dirPoints !== undefined && dirPoints < 10) {
+				$scope.points[activity.direction]++;
+			}
 		}
+		
+		$scope.cleaningComplete = cleaningComplete();
+	};
+	
+	$scope.pointToColor = function(points) {
+		var yellow = [ 255, 204, 51 ],
+			white = [ 238, 238, 238 ],
+			result = [ 0, 0, 0 ];
+			
+		for (var i = 0; i < 3; i++) {
+			result[i] = Math.floor(yellow[i] + points * 0.1 * (white[i] - yellow[i]));
+		}
+		
+		return 'background-color: rgb(' + result[0] + ',' + result[1] + ',' + result[2] + ');';		
+	};
+	
+	var totalPoints = function() {
+		var p = $scope.points;
+		
+		return p.up + p.down + p.left + p.right;
+	};
+	
+	$scope.pointsToWidth = function() {
+		return 'width: ' + totalPoints() * 100 / 40 + '%';
+	};
+	
+	var cleaningComplete = function() {
+		return totalPoints() === 40;
 	};
 	
 	var getDirection = function(ac) {
@@ -42,6 +71,10 @@ angular.module('SmartToothBrush', []).controller("ToothBrushCtrl", function($sco
 			case 'z':
 				return ac[2] > 0 ? 'up' : 'down';
 		}
+	};
+	
+	var qualifies = function(activity) {
+		return activity.frequency >= 2.0 && activity.intensity > 0.3;
 	};
 	
 	var analyzeDirection = function(data, offset, count, result) {
@@ -104,6 +137,8 @@ angular.module('SmartToothBrush', []).controller("ToothBrushCtrl", function($sco
 		analyzeDirection(data, current - fftSize, fftSize, result);
 		analyzeFFT(data, current - fftSize, fftSize, result);
 		
+		result.qualifies = qualifies(result);
+		
 		$scope.fftSource = result.fftSource;
 		$scope.fftResults = result.fftResults;
 		
@@ -112,7 +147,7 @@ angular.module('SmartToothBrush', []).controller("ToothBrushCtrl", function($sco
 			$scope.activity.pop();
 		}
 		
-		updateProgress(result);
+		awardPoints(result);
 	};
 	
 	var parseSample = function(s) {
@@ -132,7 +167,7 @@ angular.module('SmartToothBrush', []).controller("ToothBrushCtrl", function($sco
 	};
 	
 	var animLoop = function() {
-		while ($scope.currentFrame < $scope.totalFrames) {
+		while ($scope.currentFrame < $scope.data.length) {
 			$scope.currentPoint = $scope.data[$scope.currentFrame++];
 			
 			var fftSize = 20;
@@ -150,7 +185,8 @@ angular.module('SmartToothBrush', []).controller("ToothBrushCtrl", function($sco
 		
 		if ($scope.lastCreatedAt) {
 			params = {
-				where: { "createdAt": { "$gt": {__type: 'Date', iso: $scope.lastCreatedAt }}}
+				where: { "createdAt": { "$gt": {__type: 'Date', iso: $scope.lastCreatedAt }}},
+				count: 1
 			}
 		}
 		
@@ -165,31 +201,38 @@ angular.module('SmartToothBrush', []).controller("ToothBrushCtrl", function($sco
 		$scope.lastRequestSent = new Date();
 		
 		request.success(function(data) {
-			var lastCreatedAt, prevCount = $scope.data.length, newCount;
+			var lastCreatedAt, sampleCount = 0;
 			
 		    data.results.forEach(function(rec) {
+				if (rec.cleaningId !== $scope.cleaningId) {
+					newCleaning(rec.cleaningId);
+				}
+				
 				var samples = rec.data.split('|');
 			
 				samples.forEach(function(s) {
 					$scope.data.push(parseSample(s));
 				});
 				
+				sampleCount += samples.length;
 				lastCreatedAt = rec.createdAt;
 		    });
 		
-			newCount = $scope.data.length;
-			
 			if (lastCreatedAt) {
 				$scope.lastCreatedAt = lastCreatedAt;
-				$scope.totalFrames = newCount;
 			}
 			
 			$scope.lastBatchCount = data.results.length;
-			$scope.lastSampleCount = newCount - prevCount;
-			
+			$scope.lastBatchServerCount = data.count;
+			$scope.lastSampleCount = sampleCount;
 			$scope.lastRequestResp = new Date();
 			
-			$timeout(requestLoop, 2000);
+			if (data.count && data.count > data.results.length) {
+				requestLoop();
+			}
+			else {
+				$timeout(requestLoop, 1000);
+			}
 		});
 		
 		request.error(function() {
@@ -197,12 +240,18 @@ angular.module('SmartToothBrush', []).controller("ToothBrushCtrl", function($sco
 		});
 	};
 	
+	var newCleaning = function(cleaningId) {
+		$scope.cleaningId = cleaningId;
+		$scope.data = [];
+		$scope.activity = [];
+		$scope.points = initPoints();
+		$scope.cleaningComplete = cleaningComplete();
+		
+		$scope.currentFrame = 0;
+	};
+	
 	$scope.floor = Math.floor;
-	
-	$scope.data = [];
-	$scope.activity = [];
-	$scope.progress = initProgress();
-	
+		
 	$scope.lastCreatedAt = undefined;
 	$scope.lastBatchCount = 0;
 	$scope.lastSampleCount = 0;
@@ -210,8 +259,11 @@ angular.module('SmartToothBrush', []).controller("ToothBrushCtrl", function($sco
 	$scope.fftSource = [];
 	$scope.fftResults = [];
 	
+	$scope.data = [];
+	$scope.activity = [];
+	$scope.points = initPoints();
+	
 	$scope.currentFrame = 0;
-	$scope.totalFrames = 0;
 	$scope.currentPoint = [];
 	
 	requestLoop();
