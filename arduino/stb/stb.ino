@@ -3,12 +3,13 @@
 #include <SoftwareSerial.h>
 
 LSM303 compass;
-SoftwareSerial Bluetooth = SoftwareSerial(2, 3);
+
+//SoftwareSerial Bluetooth = SoftwareSerial(2, 3); - causes framing errors at 57600!
+
+#define Bluetooth Serial
 
 void setup() {
-    Bluetooth.begin(9600);
-    
-    Serial.begin(9600);
+    Bluetooth.begin(57600);
     Wire.begin();
     
     compass.init();
@@ -18,14 +19,21 @@ void setup() {
 
 char out[80];
 
-void loop() {
+void loop() {    
     compass.read();
-
-    sprintf(out, "A: x: %5d y: %5d z: %5d ", (int)compass.a.x, (int)compass.a.y, (int)compass.a.z);
-    Bluetooth.print(out);
+   
+    Bluetooth.print("A: x: ");
+    Bluetooth.print((int)compass.a.x);
+    Bluetooth.print(" y: ");
+    Bluetooth.print((int)compass.a.y);
+    Bluetooth.print(" z: ");
+    Bluetooth.print((int)compass.a.z);
+    Bluetooth.print(" M: x: ");
+    Bluetooth.print((int)compass.m.x);
+    Bluetooth.print(" y: ");
+    Bluetooth.print((int)compass.m.y);
+    Bluetooth.print(" z: ");
+    Bluetooth.println((int)compass.m.z);
     
-    sprintf(out, "M: x: %5d y: %5d z: %5d", (int)compass.m.x, (int)compass.m.y, (int)compass.m.z);
-    Bluetooth.println(out);
-    
-    delay(100);
+    delay(92); // magic to have ~ 10 samples/second
 }
