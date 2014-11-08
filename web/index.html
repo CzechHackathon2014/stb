@@ -1,18 +1,21 @@
 <html>
 
     <head>
-      <script type="text/javascript" src="angular.js"></script>
-      <script type="text/javascript" src="app.js"></script>
+		<meta charset="utf-8">
+		<script type="text/javascript" src="bower_components/angular/angular.js"></script>
+		<script type="text/javascript" src="bower_components/d3/d3.js"></script>
+		<script type="text/javascript" src="bower_components/angular-charts/dist/angular-charts.js"></script>
+		<script type="text/javascript" src="app.js"></script>
+		<link href="app.css" rel="stylesheet" type="text/css">
     </head>
 
-    <body ng-app>
+    <body ng-app="SmartToothBrush">
       <div ng-controller="ToothBrushCtrl">
         <h2>Raw Data</h2>
-        <ul>
-          <li ng-repeat="point in accel">
-            {{ point.x }} {{ point.y }} {{ point.z }}
-          </li>
-        </ul>
+		<h3>Number of records: {{ data.length }}</h3>
+		<h3>Last request: sent: {{ lastRequestSent }} resp: {{ lastRequestResp }} since: {{ lastCreatedAt }} objs: {{ lastBatchCount}} samples: {{ lastSampleCount }}</h3>
+		<h3>Action: {{ direction }} {{ currentFrame }} of {{ totalFrames}} - {{ currentPoint }}</h3>
+		<div id="brush-3d" class="brush-3d" style="{{brushStyle}}"></div>
       </div>
     </body>
 </html>
