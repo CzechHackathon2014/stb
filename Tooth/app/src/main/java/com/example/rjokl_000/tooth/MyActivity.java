@@ -19,8 +19,9 @@ import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.parse.Parse;
 import com.parse.ParseException;
@@ -41,6 +42,9 @@ import java.util.regex.Pattern;
 
 public class MyActivity extends Activity implements SensorEventListener {
 
+    final boolean btSource = false;
+    boolean running = false;
+
     private SensorManager mSensorManager;
     private Sensor mSensor;
     private String sdata;
@@ -50,6 +54,10 @@ public class MyActivity extends Activity implements SensorEventListener {
     private BluetoothSocket btSocket = null;
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     final int RECIEVE_MESSAGE = 1;
+
+    public void onClick(View v) {
+        running = ! running;
+    }
 
     // Create a BroadcastReceiver for ACTION_FOUND
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -127,7 +135,7 @@ public class MyActivity extends Activity implements SensorEventListener {
 
         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice("20:13:09:30:16:50");
 
-        if (true) {
+        if (btSource) {
             try {
                 btSocket = createBluetoothSocket(device);
                 btSocket.connect();
@@ -143,6 +151,8 @@ public class MyActivity extends Activity implements SensorEventListener {
         ImageView view2 = (ImageView) findViewById(R.id.imageView2);
         view.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.test));
         view2.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.test2));
+
+        Button button = (Button) findViewById(R.id.button);
     }
 
     private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
@@ -178,20 +188,18 @@ public class MyActivity extends Activity implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
 
-        //ImageView view = (ImageView) findViewById(R.id.imageView);
-        //Log.d("asd", String.format("%d, %d", view.getWidth(), view.getHeight()));
-
-
-        return;
-
-        /*TextView text1 = (TextView) findViewById(R.id.textView);
-
-        //Log.d("tag", String.format("%d", sensorEvent.values.length));
-        //Log.d("tag", String.format("%03.2f %03.2f %03.2f", sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]));
-        addSample(sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2], 0, 0, 0);*/
+        if ( ! btSource) {
+            //Log.d("tag", String.format("%03.2f %03.2f %03.2f", sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]));
+            addSample(sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2], 0, 0, 0);
+        }
     }
 
     private void addSample(float x, float y, float z, float a, float b, float c) {
+
+        if (!running)
+            return;
+
+
         sdatacount++;
 
         if (!sdata.isEmpty()) {
@@ -219,6 +227,10 @@ public class MyActivity extends Activity implements SensorEventListener {
 
             sdatacount = 0;
             sdata = "";
+
+            ImageView view = (ImageView) findViewById(R.id.imageView);
+            view.setAlpha((float)(System.currentTimeMillis() % 1000) / 1000);
+            //Log.d("asd", String.format("%d, %d", view.getWidth(), view.getHeight()));
         }
     }
 
@@ -251,7 +263,6 @@ public class MyActivity extends Activity implements SensorEventListener {
         public void run() {
             String line; // line returned from read()
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(mmInStream));
-
 
             // Keep listening to the InputStream until an exception occurs
             while (true) {
