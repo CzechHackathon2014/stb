@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.BitmapFactory;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -18,6 +19,7 @@ import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.parse.Parse;
@@ -48,7 +50,6 @@ public class MyActivity extends Activity implements SensorEventListener {
     private BluetoothSocket btSocket = null;
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     final int RECIEVE_MESSAGE = 1;
-
 
     // Create a BroadcastReceiver for ACTION_FOUND
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -81,6 +82,31 @@ public class MyActivity extends Activity implements SensorEventListener {
         // jarda
         Parse.initialize(this, "LTxpj4PZ88hs9OwNLobWYwzI2Xr1nAAQpD555oPc", "WQV7TgBSSvA1j5uBj7GIeVyWm4byMSDkcW7rMfU3");
 
+        h = new Handler() {
+            public void handleMessage(android.os.Message msg) {
+                switch (msg.what) {
+                    case RECIEVE_MESSAGE:
+                        //A: x:    -8 y:   -16 z: -1040 M: x:   122 y:  -307 z:   459
+                        Pattern dp = Pattern.compile("A: x: +(-?\\d+) y: +(-?\\d+) z: +(-?\\d+) M: x: +(-?\\d+) y: +(-?\\d+) z: +(-?\\d+)");
+                        String line = (String)msg.obj;
+
+                        Matcher m = dp.matcher(line);
+                        if (m.find()) {
+                            addSample(
+                                    Float.parseFloat(m.group(1))/100,
+                                    Float.parseFloat(m.group(2))/100,
+                                    Float.parseFloat(m.group(3))/100,
+                                    Float.parseFloat(m.group(4))/100,
+                                    Float.parseFloat(m.group(5))/100,
+                                    Float.parseFloat(m.group(6))/100
+                            );
+                            //Log.d("handler", line);
+                        }
+                        break;
+                }
+            };
+        };
+
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
 
@@ -101,44 +127,22 @@ public class MyActivity extends Activity implements SensorEventListener {
 
         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice("20:13:09:30:16:50");
 
-        try {
-            btSocket = createBluetoothSocket(device);
-            btSocket.connect();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (true) {
+            try {
+                btSocket = createBluetoothSocket(device);
+                btSocket.connect();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            mConnectedThread = new ConnectedThread(btSocket);
+            mConnectedThread.start();
         }
 
-        h = new Handler() {
-            public void handleMessage(android.os.Message msg) {
-                switch (msg.what) {
-                    case RECIEVE_MESSAGE:
-                        //A: x:    -8 y:   -16 z: -1040 M: x:   122 y:  -307 z:   459
-                        Pattern dp = Pattern.compile("A: x: +(-?\\d+) y: +(-?\\d+) z: +(-?\\d+) M: x: +(-?\\d+) y: +(-?\\d+) z: +(-?\\d+)");
-                        String line = (String)msg.obj;
-
-                        Matcher m = dp.matcher(line);
-                        if (m.find()) {
-
-
-                            addSample(
-                                    Float.parseFloat(m.group(1))/100,
-                                    Float.parseFloat(m.group(2))/100,
-                                    Float.parseFloat(m.group(3))/100,
-                                    Float.parseFloat(m.group(4))/100,
-                                    Float.parseFloat(m.group(5))/100,
-                                    Float.parseFloat(m.group(6))/100
-                            );
-                            Log.d("handler", line);
-
-                        }
-
-                        break;
-                }
-            };
-        };
-
-        mConnectedThread = new ConnectedThread(btSocket);
-        mConnectedThread.start();
+        ImageView view = (ImageView) findViewById(R.id.imageView);
+        ImageView view2 = (ImageView) findViewById(R.id.imageView2);
+        view.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.test));
+        view2.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.test2));
     }
 
     private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
@@ -174,6 +178,10 @@ public class MyActivity extends Activity implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
 
+        //ImageView view = (ImageView) findViewById(R.id.imageView);
+        //Log.d("asd", String.format("%d, %d", view.getWidth(), view.getHeight()));
+
+
         return;
 
         /*TextView text1 = (TextView) findViewById(R.id.textView);
@@ -191,7 +199,7 @@ public class MyActivity extends Activity implements SensorEventListener {
         }
 
         sdata += "timestamp:" + System.currentTimeMillis()  + " point:" + String.format(Locale.ENGLISH, "%03.2f,%03.2f,%03.2f,%03.2f,%03.2f,%03.2f", x, y, z, a, b, c) ;
-        if (sdatacount == 100) {
+        if (sdatacount == 10) {
 
             Log.d("tag", String.format("%s", sdata));
 
