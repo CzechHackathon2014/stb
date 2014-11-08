@@ -11,10 +11,12 @@
 
     <body ng-app="SmartToothBrush">
       <div ng-controller="ToothBrushCtrl">
-		<div class="raw-data">
-			<div ng-repeat="(dir, stats) in progress"><b>{{ dir }}</b>: {{ stats.count}} / {{ stats.points }}</div>
+		<div class="page-box">
+			<div class="tooth-box up">up: {{ progress.up.count }}</div>
+			<div class="tooth-box left">left</div><div class="tooth-box right">right</div>
+			<div class="tooth-box down">down</div>
 		</div>
-		<div class="raw-data">
+		<div class="page-box raw-data">
 			<p>Number of records: {{ data.length }}</p>
 			<p>Last request: sent: {{ lastRequestSent }} resp: {{ lastRequestResp }} since: {{ lastCreatedAt }} objs: {{ lastBatchCount}} samples: {{ lastSampleCount }}</p>
 			<p>Action: {{ currentFrame }} of {{ totalFrames}} - {{ currentPoint }}</p>

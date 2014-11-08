@@ -1,19 +1,28 @@
-.title {
-  font-size: 13px; }
+body {
+  font-family: 'Helvetica Neue', 'Helvetica';
+  font-size: 12px; }
 
-.brush-3d {
-  margin: 20px 100px;
-  width: 50px;
-  height: 50px;
-  background-color: green;
-  transform: perspective(100px); }
-
-.raw-data {
-  font-family: Courier, 'Lucida Console';
-  font-size: 12px;
+.page-box {
   border: 1px solid black;
   padding: 10px;
   margin-bottom: 10px; }
+
+.raw-data {
+  font-family: Courier, 'Lucida Console'; }
+
+.tooth-box {
+  height: 40px;
+  line-height: 40px;
+  border: 1px solid #888;
+  background-color: #ffcc33;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  text-align: center; }
+  .tooth-box.up, .tooth-box.down {
+    width: 412px; }
+  .tooth-box.left, .tooth-box.right {
+    width: 200px;
+    display: inline-block; }
 
 .chart {
   margin-bottom: 10px; }

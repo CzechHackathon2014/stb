@@ -36,11 +36,11 @@ angular.module('SmartToothBrush', []).controller("ToothBrushCtrl", function($sco
 		
 		switch (axis) {
 			case 'x':
-				return Math.sign(ac[0]) > 0 ? 'inner-up' : 'inner-down';
+				return ac[0] > 0 ? 'inner-up' : 'inner-down';
 			case 'y':
-				return Math.sign(ac[1]) > 0 ? 'right' : 'left';
+				return ac[1] > 0 ? 'right' : 'left';
 			case 'z':
-				return Math.sign(ac[2]) > 0 ? 'up' : 'down';
+				return ac[2] > 0 ? 'up' : 'down';
 		}
 	};
 	
@@ -150,12 +150,15 @@ angular.module('SmartToothBrush', []).controller("ToothBrushCtrl", function($sco
 		
 		if ($scope.lastCreatedAt) {
 			params = {
-				where: { createdAt: { $gt: {__type: 'Date', iso: $scope.lastCreatedAt }}}
+				where: { "createdAt": { "$gt": {__type: 'Date', iso: $scope.lastCreatedAt }}}
 			}
 		}
 		
 		var request = $http.get('https://api.parse.com/1/classes/SensorData', {
-			headers: reqHeaders,
+			headers: {
+				'X-Parse-Application-Id': 'LTxpj4PZ88hs9OwNLobWYwzI2Xr1nAAQpD555oPc',
+				'X-Parse-REST-API-Key': 'NOl6eSpzXjySARLWGrIHgLD4qohcTQ8zzq0clLQP'
+			},
 			params: params
 		});
 		
@@ -192,10 +195,6 @@ angular.module('SmartToothBrush', []).controller("ToothBrushCtrl", function($sco
 		request.error(function() {
 		    alert('Error fetching accel data');
 		});
-	};
-	var reqHeaders = {
-		'X-Parse-Application-Id': 'LTxpj4PZ88hs9OwNLobWYwzI2Xr1nAAQpD555oPc',
-		'X-Parse-REST-API-Key': 'NOl6eSpzXjySARLWGrIHgLD4qohcTQ8zzq0clLQP'
 	};
 	
 	$scope.floor = Math.floor;

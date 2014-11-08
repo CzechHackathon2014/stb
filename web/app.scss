@@ -1,25 +1,35 @@
-$font-size: 13px;
-
-.title {
-	font-size: $font-size;
-}
-
-.brush-3d {
-	margin: 20px 100px;
-	width: 50px;
-	height: 50px;
-	background-color: green;
-	
-	transform: perspective(100px);
-}
-
-.raw-data {
-	font-family: Courier, 'Lucida Console';
+body {
+	font-family: 'Helvetica Neue', 'Helvetica';
 	font-size: 12px;
-	
+}
+
+.page-box {	
 	border: 1px solid black;
 	padding: 10px;
 	margin-bottom: 10px;
+}
+
+.raw-data {
+	font-family: Courier, 'Lucida Console';	
+}
+
+.tooth-box {
+	height: 40px;
+	line-height: 40px;
+	border: 1px solid #888;
+	background-color: rgba(255, 204, 51, 1.0);
+	margin-right: 10px;
+	margin-bottom: 10px;
+	text-align: center;
+	
+	&.up, &.down {
+		width: 412px;
+	}
+	
+	&.left, &.right {
+		width: 200px;
+		display: inline-block;
+	}
 }
 
 .chart {
