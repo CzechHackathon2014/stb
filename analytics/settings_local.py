@@ -1,0 +1,3 @@
+APPLICATION_ID = "czhackathonstb"
+REST_API_KEY = "3vFIDYvNEu9JXBMpy2qo9QEUfJXOPlzG3kx8Cdwo"
+MASTER_KEY = "IN1faTL0wso0QKJKnsz1VeMksn364Sxs64NcuanS"
