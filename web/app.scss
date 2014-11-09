@@ -2,16 +2,18 @@ body {
 	font-family: 'Helvetica Neue', 'Helvetica';
 	font-size: 12px;
 	background-color: #eee;
+	margin: 0;
 }
 
-.page-box {	
-	border: 1px solid black;
+.page-box {
 	padding: 10px;
 	margin-bottom: 10px;
 }
 
 .raw-data {
-	font-family: Courier, 'Lucida Console';	
+	border: 1px solid black;
+	font-family: Courier, 'Lucida Console';
+	margin: 10px;
 }
 
 .teeth-box {
@@ -19,8 +21,7 @@ body {
 	width: 666px;
 	border: 0 none;
 	position: relative;
-	margin-left: auto;
-	margin-right: auto;
+	margin: 10px auto 200px auto;
 }
 
 .tooth-box {
@@ -30,7 +31,7 @@ body {
 	
 	&.up {
 		background-image: url(img/zuby-horni.png);
-		-webkit-clip-path: polygon(639px 6px,625px 146px,594px 191px,480px 244px,357px 269px,288px 269px,126px 224px,20px 176px,18px 10px);
+		-webkit-clip-path: polygon(639px 6px,625px 146px,594px 191px,480px 244px,357px 269px,288px 269px,126px 224px,20px 176px,18px 6px);
 		width: 656px;
 		height: 277px;
 		z-index: 1;
@@ -64,21 +65,94 @@ body {
 }
 
 .complete {
-	background-image: url(img/complete.jpg);
+	width: 256px;
+	background-color: white;
 	border: 6px solid white;
 	border-radius: 10px;
-	width: 256px;
-	height: 192px;
 	margin-left: -134px;
-	margin-top: -102px;
-	top: 50%;
+	top: 192px;
 	left: 50%;
 	position: absolute;
+	
+	.japonec {
+		background-image: url(img/complete.jpg);
+		width: 256px;
+		height: 192px;	
+	}
+	
+	.tweet {
+		margin-top: 6px;
+		text-align: center;
+	}
 }
 
 .progress {
 	height: 3px;
 	background-color: turquoise;
+}
+
+.indicator {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	width: 12px;
+	
+	.led {
+		float: left;
+		width: 4px;
+		height: 4px;
+		visibility: hidden;
+	}
+
+	&.good .led {
+		background-color: red;			
+	}
+	
+	&.bad .led {
+		background-color: #888;		
+	}
+	
+	&.up {
+		.b, .d, .f {
+			visibility: visible;
+		}
+	}
+	
+	&.down {
+		.d, .f, .h {
+			visibility: visible;
+		}		
+	}
+	
+	&.left {
+		.b, .d, .h {
+			visibility: visible;
+		}
+	}
+	
+	&.right {
+		.b, .f, .h {
+			visibility: visible;
+		}
+	}
+	
+	&.inner-up {
+		.b, .g, .i {
+			visibility: visible;
+		}
+	}
+	
+	&.inner-down {
+		.a, .c, .h {
+			visibility: visible;
+		}		
+	}
+	
+	&.no-data {
+		.e {
+			visibility: visible;
+		}
+	}
 }
 
 .chart {

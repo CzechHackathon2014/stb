@@ -18,7 +18,30 @@
 			--><div class="tooth-box right" style="{{ pointToColor(points.right) }}" title="{{points.right}}"></div>
 			<div class="tooth-box down" style="{{ pointToColor(points.down)}}" title="{{points.down}}"></div>
 			<div class="progress" style="{{ pointsToWidth() }}" ng-show="!cleaningComplete"></div>
-			<div class="complete" ng-show="cleaningComplete"></div>
+			<div class="complete" ng-show="cleaningComplete">
+				<div class="japonec"></div>
+				<div class="tweet">
+					<a class="twitter-share-button"
+					   href="https://twitter.com/intent/tweet"
+					   data-size="large"
+					   data-text="Yeah, I feel great! I have just perfectly cleaned my teeth!"
+					   data-hashtags="smarttoothbrush,czhackathon"
+					   data-count="none"
+					   data-url="none"
+					>Tweet</a>
+				</div>
+			</div>
+			<div class="indicator {{ indiClass }}">
+				<div class="led a"></div>
+				<div class="led b"></div>
+				<div class="led c"></div>
+				<div class="led d"></div>
+				<div class="led e"></div>
+				<div class="led f"></div>
+				<div class="led g"></div>
+				<div class="led h"></div>
+				<div class="led i"></div>
+			</div>
 		</div>
 		<div class="page-box raw-data">
 			<h3>Telemetry</h3>

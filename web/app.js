@@ -1,3 +1,13 @@
+window.twttr=(function(d,s,id){
+	var t,js,fjs=d.getElementsByTagName(s)[0];
+	if(d.getElementById(id)){return}
+	js=d.createElement(s);
+	js.id=id;
+	js.src="https://platform.twitter.com/widgets.js";
+	fjs.parentNode.insertBefore(js,fjs);
+	return window.twttr||(t={_e:[],ready:function(f){t._e.push(f)}})
+}(document,"script","twitter-wjs"));
+
 angular.module('SmartToothBrush', []).controller("ToothBrushCtrl", function($scope, $http, $timeout) {
 	var initPoints = function() {
 		var dirs = ['up', 'down', 'left', 'right', 'up-inner', 'down-inner'],
@@ -148,6 +158,7 @@ angular.module('SmartToothBrush', []).controller("ToothBrushCtrl", function($sco
 		}
 		
 		awardPoints(result);
+		$scope.indiClass = indiClass(result);
 	};
 	
 	var parseSample = function(s) {
@@ -178,6 +189,10 @@ angular.module('SmartToothBrush', []).controller("ToothBrushCtrl", function($sco
 		}
 
 		$timeout(animLoop, 10);
+	};
+	
+	var indiClass = function(activity) {
+		return (activity.qualifies ? 'good' : 'bad') + ' ' + activity.direction;
 	};
 	
 	var requestLoop = function() {
@@ -220,6 +235,9 @@ angular.module('SmartToothBrush', []).controller("ToothBrushCtrl", function($sco
 		
 			if (lastCreatedAt) {
 				$scope.lastCreatedAt = lastCreatedAt;
+			}
+			else {
+				$scope.indiClass = 'bad no-data';
 			}
 			
 			$scope.lastBatchCount = data.results.length;
@@ -265,6 +283,7 @@ angular.module('SmartToothBrush', []).controller("ToothBrushCtrl", function($sco
 	
 	$scope.currentFrame = 0;
 	$scope.currentPoint = [];
+	$scope.indiClass = '';
 	
 	requestLoop();
 	animLoop();
