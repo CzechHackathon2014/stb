@@ -156,9 +156,7 @@ public class MyActivity extends Activity implements SensorEventListener {
         }
 
         ImageView view = (ImageView) findViewById(R.id.imageView);
-        ImageView view2 = (ImageView) findViewById(R.id.imageView2);
         view.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.test));
-        view2.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.test2));
 
     }
 
@@ -235,8 +233,8 @@ public class MyActivity extends Activity implements SensorEventListener {
             sdatacount = 0;
             sdata = "";
 
-            ImageView view = (ImageView) findViewById(R.id.imageView);
-            view.setAlpha((float)(System.currentTimeMillis() % 1000) / 1000);
+            //ImageView view = (ImageView) findViewById(R.id.imageView);
+            //view.setAlpha((float)(System.currentTimeMillis() % 1000) / 1000);
             //Log.d("asd", String.format("%d, %d", view.getWidth(), view.getHeight()));
         }
     }
