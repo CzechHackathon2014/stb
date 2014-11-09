@@ -170,7 +170,7 @@ angular.module('SmartToothBrush', []).controller("ToothBrushCtrl", function($sco
 		while ($scope.currentFrame < $scope.data.length) {
 			$scope.currentPoint = $scope.data[$scope.currentFrame++];
 			
-			var fftSize = 20;
+			var fftSize = 30;
 			
 			if ($scope.currentFrame > fftSize && (($scope.currentFrame % fftSize) === 0)) {
 				analyze($scope.data, $scope.currentFrame, fftSize);
